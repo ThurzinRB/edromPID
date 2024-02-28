@@ -4,55 +4,70 @@
 
 class motor {
    private:
-    int id;
+    int id; //motor id
     int pwmPort, in1Port, in2Port;  // ports of the h bridge
     float Kp, Ki, Kd;               // PID constants
     int sensorPort;                 // angle sensor
     float angle;                    // angle value
     float angleRef;                 // target value for angle
     float error, lastError;         // error
-    float minAngle, maxAngle;
-    float sumError = 0;
+    float sumError = 0; //error integral
+    float minAngle, maxAngle; //joint minimum and maximum angles used to calculate the current angle
     void move(int pwmValue) {
+        /*this function receives the value that we want to write on the motor, if the value is positiv
+        move to a certain direction, if the value is negative move to the oposite direction
+        */
         if (pwmValue > 0) {
             analogWrite(in1Port, HIGH);
             analogWrite(in2Port, LOW);
+            analogWrite(pwmPort, pwmValue);
         } else {
             digitalWrite(in1Port, HIGH);
             digitalWrite(in2Port, LOW);
+            analogWrite(-pwmPort, pwmValue);
+
         }
-        analogWrite(pwmPort, pwmValue);
     }
 
    public:
     motor(int iid, int ipwmPort, int iin1Port, int iin2Port, float iKp, float iKi,
           float iKd, float isensorPort, float iminAngle, float imaxAngle) {
+        /*
+        motor constructor, get motor values and stores it
+        */
         id = iid;
-        pwmPort = ipwmPort;
-        in1Port = iin1Port;
-        in2Port = iin2Port;
-        Kp = iKp;
-        Ki = iKi;
-        Kd = iKd;
-        minAngle = iminAngle;
-        maxAngle = imaxAngle;
-        sensorPort = isensorPort;
+        pwmPort = ipwmPort; //motor h bridge pwmPort
+        in1Port = iin1Port; //motor h bridge in1 port
+        in2Port = iin2Port; //motor h bridge in2 port
+        Kp = iKp; //PID constant
+        Ki = iKi; //PID constant
+        Kd = iKd; //PID constant
+        minAngle = iminAngle; //angle that corresponds to the 0 value of the potentiometer
+        maxAngle = imaxAngle; //angle that corresponds to the max value of the potentiometer
+        sensorPort = isensorPort; //port of the potentiometer
         
     }
     void init(){
+        /*
+        initiates the motor, basically sets the mode of the pins
+        */
+
         pinMode(pwmPort, OUTPUT);
         pinMode(in1Port, OUTPUT);
         pinMode(in2Port, OUTPUT);
         pinMode(sensorPort, INPUT);
     }
     float control(float iangRef){
-        angleRef = iangRef;
-        angle = readAngle();
-        error = angle - angleRef;
-        sumError += error;
-        float pwmValue = Kp * error + Ki * sumError + Kd * (error - lastError);
-        move(pwmValue);
-        lastError = error;
+        /*
+        runs the PID based on the desired angle iangRef
+        */
+        angleRef = iangRef; //stores angRef
+        angle = readAngle(); //gets the angle from the sensor
+        error = angle - angleRef; //calculate error
+        sumError += error; //calculate the intgral of the error
+        float pwmValue = Kp * error + Ki * sumError + Kd * (error - lastError); //PID calculus
+        move(pwmValue); //write the PID to the motor
+        lastError = error; //updates last error
     }
     float readAngle(){
 
@@ -72,6 +87,8 @@ void loop() {
     while (1) {
         int dt = 10;
         int now = millis();
+
+        //!TODO: receber informação das posições desejadas dos motores
         
         myMotor.control(30);
 
