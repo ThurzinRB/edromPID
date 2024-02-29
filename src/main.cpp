@@ -82,14 +82,14 @@ class motor {
 
 motor myMotor(0, 1, 2, 3, 10, 10, 10, 5, 0, 90);
 
+int chartoint(char a,char b){
+    return a<<4 + b;
+}
 void setup() {
     Wire.begin();
     myMotor.init();
 }
 
-int chartoint(char a,char b){
-    return a<<4 + b;
-}
 
 void loop() {
     while (1) {
