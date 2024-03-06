@@ -75,8 +75,8 @@ class motor {
         lastError = error;  // updates last error
     }
     float readAngle() {
-        //! TODO: implement comunication with slave to ask angle
-        return map(analogRead(sensorPort), 0, 255, minAngle, maxAngle);
+        int sensorRead = sensorValues[id];
+        return map(analogRead(sensorRead), 0, 255, minAngle, maxAngle);
     }
 };
 
@@ -89,7 +89,6 @@ void setup() {
     Wire.begin();
     myMotor.init();
 }
-
 
 void loop() {
     while (1) {
